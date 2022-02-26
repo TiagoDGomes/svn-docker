@@ -73,7 +73,7 @@ SvnAdminExecutable=/usr/bin/svnadmin
 
 [Users:passwd]
 # The user database file.
-SVNUserFile=/etc/subversion/subversion-access-control
+SVNUserFile=/etc/subversion/passwd
 
 [Users:digest]
 # The user digest database file.

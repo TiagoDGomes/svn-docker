@@ -1,0 +1,38 @@
+--- /opt/svnadmin/pages/settings/backend.html.php
++++ backend.html.php
+@@ -77,7 +77,7 @@
+     <tr>
+       <td><?php Translate("Subversion authorization file"); ?><br><small><b><?php Translate("Example"); ?>:</b> <?php PrintStringValue("SVNAuthFileEx"); ?></small></td>
+       <td>
+-        <input type="text" name="SVNAuthFile" id="SVNAuthFile" value="<?php PrintStringValue("SVNAuthFile"); ?>">
++        <input readonly type="text" name="SVNAuthFile" id="SVNAuthFile" value="<?php PrintStringValue("SVNAuthFile"); ?>">
+         <input type="button" id="SVNAuthFileTest" value="<?php Translate("Test"); ?>">
+         <span id="SVNAuthFileTestResult" style="display:none;"></span>
+       </td>
+@@ -231,7 +231,7 @@
+     <tr>
+       <td><?php Translate("Parent directory of the repositories (SVNParentPath)"); ?><br><small><b><?php Translate("Example"); ?>:</b> <?php PrintStringValue("SVNParentPathEx"); ?></small></td>
+       <td>
+-        <input type="text" name="SVNParentPath" id="SVNParentPath" value="<?php PrintStringValue("SVNParentPath"); ?>">
++        <input readonly type="text" name="SVNParentPath" id="SVNParentPath" value="<?php PrintStringValue("SVNParentPath"); ?>">
+         <input type="button" id="SVNParentPathTest" value="<?php Translate("Test"); ?>">
+         <span id="SVNParentPathTestResult" style="display:none;"></span>
+       </td>
+@@ -239,7 +239,7 @@
+     <tr>
+       <td><?php Translate("Subversion client executable"); ?><br><small><b><?php Translate("Example"); ?>:</b> <?php PrintStringValue("SvnExecutableEx"); ?></small></td>
+       <td>
+-        <input type="text" name="SvnExecutable" id="SvnExecutable" value="<?php PrintStringValue("SvnExecutable"); ?>">
++        <input readonly type="text" name="SvnExecutable" id="SvnExecutable" value="<?php PrintStringValue("SvnExecutable"); ?>">
+         <input type="button" id="SvnExecutableTest" value="<?php Translate("Test"); ?>">
+         <span id="SvnExecutableTestResult" style="display:none;"></span>
+       </td>
+@@ -247,7 +247,7 @@
+     <tr>
+       <td><?php Translate("Subversion admin executable"); ?><br><small><b><?php Translate("Example"); ?>:</b> <?php PrintStringValue("SvnAdminExecutableEx"); ?></small></td>
+       <td>
+-        <input type="text" name="SvnAdminExecutable" id="SvnAdminExecutable" value="<?php PrintStringValue("SvnAdminExecutable"); ?>">
++        <input readonly type="text" name="SvnAdminExecutable" id="SvnAdminExecutable" value="<?php PrintStringValue("SvnAdminExecutable"); ?>">
+         <input type="button" id="SvnAdminExecutableTest" value="<?php Translate("Test"); ?>">
+         <span id="SvnAdminExecutableTestResult" style="display:none;"></span>
+       </td>

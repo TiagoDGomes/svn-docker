@@ -1,0 +1,105 @@
+#!/bin/sh
+
+SVNADMIN_DATA="/opt/svnadmin/data"
+APACHE_PID_FILE="/run/apache2/httpd.pid"
+CONFIG_INI="$SVNADMIN_DATA/config.ini"
+
+CONFIG_LDAP="UserViewProviderType=ldap"
+
+if [ ! -f "$CONFIG_INI" ]; then
+   cp $SVNADMIN_DATA/config.ini.tpl $CONFIG_INI
+   chmod 777 $CONFIG_INI
+fi
+
+# avoid 'already pid is running' error
+rm -f /run/apache2/httpd.pid
+
+while true;
+do
+    echo "Init apache loop check..."
+
+    SVNAuthFile="$(grep 'SVNAuthFile=' $CONFIG_INI | cut -b 13- | head -1)"
+    SVNParentPath="$(grep 'SVNParentPath=' $CONFIG_INI | cut -b 15- | head -1)"
+    REG_CONFIG_LDAP="$(grep "$CONFIG_LDAP" "$CONFIG_INI")"
+            
+    echo " SVNAuthFile = '$SVNAuthFile' "
+    echo " SVNParentPath = '$SVNParentPath' "
+    echo " REG_CONFIG_LDAP = '$REG_CONFIG_LDAP' "
+
+    # Add WebDav configuration
+    echo "
+          LoadModule dav_svn_module modules/mod_dav_svn.so
+          LoadModule authz_svn_module modules/mod_authz_svn.so
+        "  > /etc/apache2/conf.d/dav_svn.conf 
+
+    if [ "$REG_CONFIG_LDAP" == "$CONFIG_LDAP" ]; then      
+            echo "LDAP config..."
+
+            BindDN="$(grep 'BindDN=' $CONFIG_INI | cut -b 8- | head -1)"
+            BindPassword="$(grep 'BindPassword=' $CONFIG_INI | cut -b 14- | head -1)"
+            BaseDN="$(grep 'BaseDN=' $CONFIG_INI | cut -b 8- | head -1)"
+            HostAddress="$(grep 'HostAddress=' $CONFIG_INI | cut -b 13-  | head -1)"
+            SearchFilter="$(grep 'SearchFilter=' $CONFIG_INI | cut -b 14- | head -1)"
+            Attributes="$(grep 'Attributes=' $CONFIG_INI | cut -b 12- | head -1)"
+
+            echo " BindDN = '$BindDN' "
+            #echo " BindPassword = '$BindPassword' "
+            echo " HostAddress = '$HostAddress' "
+            echo " SearchFilter = '$SearchFilter' "
+            echo " Attributes = '$Attributes' "
+
+            echo "                
+                <IfModule !ldap_module>
+                        LoadModule ldap_module modules/mod_ldap.so
+                </IfModule>
+                <Location /svn>
+                        DAV svn
+                        SVNParentPath $SVNParentPath
+                        SVNListParentPath On
+                        AuthType Basic
+                        AuthName \"Subversion Repository\"
+                        AuthUserFile $SVNAuthFile
+                        #AuthzSVNAccessFile /etc/subversion/passwd
+                        AuthBasicProvider ldap      
+                        #AuthzLDAPAuthoritative on   
+                        AuthLDAPBindDN \"$BindDN\"    
+                        AuthLDAPBindPassword $BindPassword 
+                        AuthLDAPURL \"${HostAddress}${BaseDN}?$Attributes?sub?$SearchFilter\"                  
+                        Require valid-user
+                </Location>
+                " >> /etc/apache2/conf.d/dav_svn.conf 
+
+    else
+            echo "passwd config..."
+            echo "
+                <Location /svn>
+                        DAV svn
+                        SVNParentPath $SVNParentPath
+                        SVNListParentPath On
+                        AuthType Basic
+                        AuthName \"Subversion Repository\"
+                        AuthUserFile $SVNAuthFile
+                        AuthzSVNAccessFile /etc/subversion/passwd
+                        Require valid-user
+                </Location>
+            " >> /etc/apache2/conf.d/dav_svn.conf 
+    fi 
+
+    # Fix vulnerability:
+    echo "
+                <Location /svnadmin/data>
+                        Deny from all
+                </Location>
+    " >> /etc/apache2/conf.d/dav_svn.conf 
+
+
+    echo "Starting apache..."
+    /usr/sbin/httpd &
+    sleep 2
+    APACHE_PID=$(cat $APACHE_PID_FILE)   
+    echo "Sleeping..."
+    inotifywait -e modify -q $CONFIG_INI
+    echo "$CONFIG_INI changed."
+    sleep 10
+    kill $APACHE_PID
+done
