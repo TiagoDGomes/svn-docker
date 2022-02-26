@@ -28,6 +28,8 @@ RUN apk add --no-cache apache2 apache2-utils apache2-webdav apache2-ldap mod_dav
 # Solve a security issue (https://alpinelinux.org/posts/Docker-image-vulnerability-CVE-2019-5021.html)	
 RUN sed -i -e 's/^root::/root:!:/' /etc/shadow
 
+VOLUME [ "/home/svn", "/opt/svnadmin/data" ]
+
 # Fixing https://github.com/mfreiholz/iF.SVNAdmin/issues/118
 ADD svnadmin/classes/util/global.func.php /opt/svnadmin/classes/util/global.func.php
 
@@ -42,7 +44,6 @@ ENV HOME /home
 
 
 ADD config.ini.tpl /opt/svnadmin/data/
-ADD config.ini.tpl /opt/svnadmin/data/config.ini
 
 ADD run-service-check.sh /usr/bin/
 RUN chmod +x /usr/bin/run-service-check.sh

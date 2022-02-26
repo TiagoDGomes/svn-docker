@@ -9,6 +9,11 @@ HTTPD_PID_FILE="/run/apache2/httpd.pid"
 CONFIG_LDAP="UserViewProviderType=ldap"
 
 rm -rf $HTTPD_PID_FILE
+
+if [ ! -f "$CONFIG_INI" ]; then
+   cp /opt/svnadmin/data/config.ini.tpl $CONFIG_INI
+fi
+
 sleep 3
 
 
